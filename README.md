@@ -121,10 +121,26 @@ cd backend
 cp .env.example .env
 ```
 
-Open `backend/.env` and fill in:
+#### Getting your IBM watsonx.ai credentials
+
+You need two things: an **API key** and a **Project ID**.
+
+**Step 1 — IBM Cloud API key**
+1. Go to [https://cloud.ibm.com](https://cloud.ibm.com) and sign in
+2. Click your profile icon (top right) → **Manage → Access (IAM)**
+3. In the left sidebar click **API keys**
+4. Click **Create** → give it a name → **Create**
+5. Copy the key immediately — it is only shown once
+
+**Step 2 — watsonx.ai Project ID**
+1. Go to [https://dataplatform.cloud.ibm.com](https://dataplatform.cloud.ibm.com) and sign in
+2. Click **View all projects** → open your project (or create one)
+3. Click the **Manage** tab → copy the **Project ID** shown under General
+
+**Step 3 — fill in `backend/.env`**
+
 ```
 # IBM watsonx.ai — powers the AI recommendation cards
-# Get these from: https://cloud.ibm.com → watsonx.ai → Manage → Credentials
 WATSONX_API_KEY=your_ibm_cloud_api_key_here
 WATSONX_PROJECT_ID=your_watsonx_project_id_here
 WATSONX_URL=https://us-south.ml.cloud.ibm.com
