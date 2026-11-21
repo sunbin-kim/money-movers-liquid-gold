@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg:        #0d1a0d;
+  --surface:   #152215;
+  --surface-2: #1e311e;
+
+  /* Borders */
+  --border:    #2b422b;
+  --border-2:  #3a5a3a;
+
+  /* Gold brand */
+  --gold:      #f0b429;
+  --gold-dark: #c98a00;
+  --gold-pale: #2a2000;
+
+  /* Typography */
+  --text:      #f0ede6;
+  --muted:     #7a9a7a;
+
+  /* Semantic */
+  --accent:    #f0b429;
+  --low:       #4ade80;
+  --medium:    #fbbf24;
+  --high:      #f87171;
+}
+
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg:        #f5f5f0;
+  --surface:   #ffffff;
+  --surface-2: #eef0eb;
+
+  /* Borders */
+  --border:    #d0d9c8;
+  --border-2:  #b5c4a8;
+
+  /* Gold brand */
+  --gold:      #b07800;
+  --gold-dark: #8a5e00;
+  --gold-pale: #fff8e1;
+
+  /* Typography */
+  --text:      #1a1a1a;
+  --muted:     #5a7a52;
+
+  /* Semantic */
+  --accent:    #b07800;
+  --low:       #16a34a;
+  --medium:    #d97706;
+  --high:      #dc2626;
+}
+
+body {
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Risk color utilities ─────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg-risk-low:    rgba(74,222,128,0.12);
+  --bg-risk-medium: rgba(251,191,36,0.12);
+  --bg-risk-high:   rgba(248,113,113,0.12);
+}
+
+[data-theme="light"] {
+  --bg-risk-low:    rgba(22,163,74,0.10);
+  --bg-risk-medium: rgba(217,119,6,0.10);
+  --bg-risk-high:   rgba(220,38,38,0.10);
+}
+
+.risk-low    { color: var(--low); }
+.risk-medium { color: var(--medium); }
+.risk-high   { color: var(--high); }
+
+.bg-risk-low    { background: var(--bg-risk-low); }
+.bg-risk-medium { background: var(--bg-risk-medium); }
+.bg-risk-high   { background: var(--bg-risk-high); }
+
+/* ── Card ─────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.card:hover {
+  border-color: var(--border-2);
+}
+
+/* ── Gold gradient pill ───────────────────────────────── */
+.gold-pill {
+  background: linear-gradient(135deg, #c98a00, #f0b429);
+  color: #0d1a0d;
+  border-radius: 99px;
+  font-weight: 700;
+}
+
+/* ── Glossary tooltip ─────────────────────────────────── */
+.glossary-term {
+  border-bottom: 1.5px dashed var(--gold);
+  cursor: pointer;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* ── Input fields ─────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder {
+  color: var(--muted);
+}

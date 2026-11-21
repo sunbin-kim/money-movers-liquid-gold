@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Outer coin ring -->
+  <circle cx="32" cy="32" r="30" fill="url(#coinGrad)" />
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#c98a00" stroke-width="2.5" />
+
+  <!-- Inner coin face -->
+  <circle cx="32" cy="32" r="23" fill="url(#innerGrad)" />
+
+  <!-- Liquid drop shape (white-gold, centred) -->
+  <!-- Drop: rounded bottom circle + upward pointed tip -->
+  <path
+    d="M32 13 C32 13 20 26 20 35 C20 42.18 25.37 48 32 48 C38.63 48 44 42.18 44 35 C44 26 32 13 32 13 Z"
+    fill="url(#dropGrad)"
+    opacity="0.95"
+  />
+
+  <!-- Highlight glint on the drop -->
+  <ellipse cx="27.5" cy="33" rx="3.5" ry="6" fill="white" opacity="0.22" transform="rotate(-15 27.5 33)" />
+
+  <!-- Coin edge notches (decorative) -->
+  <circle cx="32" cy="2"  r="1.6" fill="#c98a00" />
+  <circle cx="32" cy="62" r="1.6" fill="#c98a00" />
+  <circle cx="2"  cy="32" r="1.6" fill="#c98a00" />
+  <circle cx="62" cy="32" r="1.6" fill="#c98a00" />
+  <circle cx="9.5"  cy="9.5"  r="1.4" fill="#c98a00" />
+  <circle cx="54.5" cy="9.5"  r="1.4" fill="#c98a00" />
+  <circle cx="9.5"  cy="54.5" r="1.4" fill="#c98a00" />
+  <circle cx="54.5" cy="54.5" r="1.4" fill="#c98a00" />
+
+  <defs>
+    <!-- Outer coin gradient: dark gold rim -->
+    <radialGradient id="coinGrad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#f0b429" />
+      <stop offset="100%" stop-color="#8a5e00" />
+    </radialGradient>
+
+    <!-- Inner face: slightly lighter gold -->
+    <radialGradient id="innerGrad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#fdd063" />
+      <stop offset="100%" stop-color="#b07800" />
+    </radialGradient>
+
+    <!-- Drop: white-gold gradient -->
+    <linearGradient id="dropGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#fffde8" />
+      <stop offset="100%" stop-color="#f0b429" />
+    </linearGradient>
+  </defs>
+</svg>
