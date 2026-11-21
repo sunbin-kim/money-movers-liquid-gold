@@ -146,13 +146,19 @@ WATSONX_PROJECT_ID=your_watsonx_project_id_here
 WATSONX_URL=https://us-south.ml.cloud.ibm.com
 WATSONX_MODEL_ID=ibm/granite-3-8b-instruct
 
-# Optional
-ALPHA_VANTAGE_API_KEY=...      # Optional: live market data
+# Alpha Vantage — strongly recommended for full functionality
+# Powers: stock price charts, real P&L calculations, latest prices on holdings
+# Without this key, charts will be empty and P&L will use illustrative estimates
+# Free API key: https://www.alphavantage.co/support/#api-key
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
+
 FRONTEND_ORIGIN=http://localhost:3000
 PORT=4000
 ```
 
-> **No API key?** The agent automatically falls back to deterministic plain-language templates — the app still works fully without a watsonx.ai key.
+> **No watsonx.ai key?** The AI agent falls back to deterministic plain-language templates — recommendations still work.
+
+> **No Alpha Vantage key?** The app runs but **stock charts will be empty** and portfolio P&L will use a fixed 4.5% illustrative estimate instead of real prices. Get a free key at [alphavantage.co](https://www.alphavantage.co/support/#api-key) — it takes under a minute.
 
 ### 4. Run the backend
 
