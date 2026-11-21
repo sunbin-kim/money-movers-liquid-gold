@@ -12,7 +12,7 @@ Liquid Gold takes three inputs from a beginner investor:
 2. **Hold period** — from 1 month to 5+ years
 3. **Risk profile** — determined by a quick 3-question quiz
 
-The AI agent (powered by OpenAI GPT-4o-mini) filters an investment universe, scores each option against the user's time horizon and risk comfort, and returns **three plain-language option cards** — each with a "Why it fits" explanation, a risk cue, and labeled historical return ranges.
+The AI agent (powered by IBM watsonx.ai with IBM Granite) filters an investment universe, scores each option against the user's time horizon and risk comfort, and returns **three plain-language option cards** — each with a "Why it fits" explanation, a risk cue, and labeled historical return ranges.
 
 Nothing happens until the user confirms. No money moves.
 
@@ -24,10 +24,11 @@ Nothing happens until the user confirms. No money moves.
 |---|---|
 | Frontend | React 18, React Router v6, Tailwind CSS |
 | Backend | Node.js, Express 4 |
-| AI Agent | OpenAI GPT-4o-mini (with deterministic fallback) |
+| AI Agent | IBM watsonx.ai · `ibm/granite-3-8b-instruct` (with deterministic fallback) |
+| AI SDK | `@ibm-cloud/watsonx-ai` Node.js SDK |
+| Database | SQLite via `better-sqlite3` |
 | Market data | Alpha Vantage API (illustrative static data in MVP) |
 | State | React Context API |
-| Session store | In-memory (replace with PostgreSQL for production) |
 
 ---
 
@@ -82,6 +83,18 @@ liquid-gold/
 - [Node.js](https://nodejs.org/) v18 or later
 - npm v9 or later
 
+> **⚠️ Windows users:** `better-sqlite3` requires a C++ compiler to build. Run the following in **PowerShell as Administrator** before `npm install`:
+> ```powershell
+> npm install --global windows-build-tools
+> ```
+> VS Code alone is not enough — this installs the actual C++ build tools separately.
+
+> **⚠️ macOS users:** If `npm start` in the frontend fails with `allowedHosts` error, create a file `frontend/.env` with:
+> ```
+> DANGEROUSLY_DISABLE_HOST_CHECK=true
+> ```
+> This is caused by macOS setting a `HOST` shell variable that conflicts with `react-scripts`.
+
 ### 1. Clone / open the project
 
 ```bash
@@ -110,13 +123,20 @@ cp .env.example .env
 
 Open `backend/.env` and fill in:
 ```
-OPENAI_API_KEY=sk-...          # Required for AI-generated explanations
-ALPHA_VANTAGE_API_KEY=...      # Optional: live market data (not used in MVP)
+# IBM watsonx.ai — powers the AI recommendation cards
+# Get these from: https://cloud.ibm.com → watsonx.ai → Manage → Credentials
+WATSONX_API_KEY=your_ibm_cloud_api_key_here
+WATSONX_PROJECT_ID=your_watsonx_project_id_here
+WATSONX_URL=https://us-south.ml.cloud.ibm.com
+WATSONX_MODEL_ID=ibm/granite-3-8b-instruct
+
+# Optional
+ALPHA_VANTAGE_API_KEY=...      # Optional: live market data
 FRONTEND_ORIGIN=http://localhost:3000
 PORT=4000
 ```
 
-> **No API key?** The agent automatically falls back to deterministic plain-language templates — the app still works fully without an OpenAI key.
+> **No API key?** The agent automatically falls back to deterministic plain-language templates — the app still works fully without a watsonx.ai key.
 
 ### 4. Run the backend
 
