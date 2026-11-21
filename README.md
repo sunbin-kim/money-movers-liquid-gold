@@ -1,4 +1,8 @@
-# 🪙 Liquid Gold
+<p align="center">
+  <img src="frontend/public/logo.png" alt="Liquid Gold logo" width="100" />
+</p>
+
+# Liquid Gold
 
 > **Your money. Clearer options. Your choice.**
 > An AI investing companion for Gen Z beginners — built by Money Movers (IBM SkillsBuild).
