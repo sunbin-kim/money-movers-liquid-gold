@@ -222,22 +222,26 @@ E.g. `/api/glossary/etf` → `{ "term": "ETF", "definition": "..." }`
 
 ---
 
-## Roadmap (Weeks 7–8)
+## Features delivered
 
 | Feature | Status |
 |---|---|
-| Budget-first input + hold period | ✅ MVP |
-| 3-option shortlist with plain reasons | ✅ MVP |
-| Risk cue on every card | ✅ MVP |
-| Trust layer (source, date, user confirms) | ✅ MVP |
-| Risk-tolerance quiz (3 questions) | ✅ MVP |
-| Side-by-side compare view | ✅ MVP |
-| Portfolio dashboard + history | ✅ MVP |
-| Tap-to-explain glossary | ✅ MVP |
-| Live Alpha Vantage market data | Week 7 |
-| User auth + persistent database | Week 7 |
-| Detailed history charts | Week 8 |
-| Mobile-optimized PWA | Week 8 |
+| Budget-first input + hold period | ✅ Done |
+| 3-option shortlist with plain reasons | ✅ Done |
+| Risk cue on every card | ✅ Done |
+| Trust layer (source, date, user confirms) | ✅ Done |
+| Risk-tolerance quiz (3 questions) | ✅ Done |
+| Side-by-side compare view | ✅ Done |
+| Portfolio dashboard + history | ✅ Done |
+| Tap-to-explain glossary | ✅ Done |
+| User auth + persistent database (SQLite) | ✅ Done |
+| Multiple named portfolios | ✅ Done |
+| Stock price charts (Alpha Vantage) | ✅ Done |
+| Friends / social leaderboard | ✅ Done |
+| Awards & trophies | ✅ Done |
+| Browse investments | ✅ Done |
+| Cash balance · deposit, withdraw, reinvest | ✅ Done |
+| IBM watsonx.ai integration (Granite model) | ✅ Done |
 
 ---
 
