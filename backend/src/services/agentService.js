@@ -7,15 +7,21 @@
  *  1. Receive: weeklyAmount, holdPeriodMonths, riskProfile
  *  2. Filter the investment universe to budget-affordable options
  *  3. Score each option against time horizon + risk profile
- *  4. Call OpenAI to get real current market context + write plain "Why it fits" cards
+ *  4. Call IBM watsonx.ai to get real current market context + write plain "Why it fits" cards
  *  5. Return top-3 options with guardrails
  *
- * If OPENAI_API_KEY is absent or the call fails, the agent falls back
- * to deterministic plain-language templates so the app always works.
+ * If WATSONX_API_KEY / WATSONX_PROJECT_ID are absent or the call fails,
+ * the agent falls back to deterministic plain-language templates so the
+ * app always works.
  */
 
-let OpenAI = null;
-try { OpenAI = require('openai'); } catch (_) { /* openai package not installed */ }
+let WatsonXAI = null;
+let IamAuthenticator = null;
+try {
+  WatsonXAI = require('@ibm-cloud/watsonx-ai').WatsonXAI;
+  IamAuthenticator = require('ibm-cloud-sdk-core').IamAuthenticator;
+} catch (_) { /* SDK not installed */ }
+
 const INVESTMENTS = require('../data/investments');
 
 // ── Risk profile → numeric score ─────────────────────────────────────────────
@@ -94,16 +100,22 @@ function selectTopOptions(weeklyAmount, riskProfile, holdPeriodMonths) {
 }
 
 /**
- * Use OpenAI to fetch current market context for a ticker and write a
- * plain-language "Why it fits" card grounded in today's market conditions.
- *
- * GPT-4o-mini's training data is current enough to give useful context on
- * well-known ETFs (SPY, QQQ, BND, etc.). We ask it in a single prompt to:
- *   1. Briefly describe what the market/asset has been doing recently
- *   2. Write a beginner "Why it fits" explanation using that context
- *
- * Falls back to a deterministic template if the API is unavailable.
+ * Returns a configured watsonx.ai service client, or null if credentials
+ * are not set.
  */
+function getWatsonxClient() {
+  if (!WatsonXAI || !IamAuthenticator) return null;
+  const apiKey = process.env.WATSONX_API_KEY;
+  const serviceUrl = process.env.WATSONX_URL || 'https://us-south.ml.cloud.ibm.com';
+  if (!apiKey) return null;
+
+  return WatsonXAI.newInstance({
+    version: '2024-05-31',
+    serviceUrl,
+    authenticator: new IamAuthenticator({ apikey: apiKey }),
+  });
+}
+
 async function buildExplanation(inv, { weeklyAmount, holdPeriodMonths, riskProfile }) {
   const holdLabel =
     holdPeriodMonths <= 3
@@ -115,17 +127,13 @@ async function buildExplanation(inv, { weeklyAmount, holdPeriodMonths, riskProfi
   // Fallback template (always available, no API needed)
   const fallback = `With $${weeklyAmount}/week over ${holdLabel}, this ${inv.riskLevel}-risk option fits your ${riskProfile} comfort level. ${inv.plainReason} Labeled historical return: ${inv.avgAnnualReturnLow}% – ${inv.avgAnnualReturnHigh}% per year.`;
 
-  if (!OpenAI || !process.env.OPENAI_API_KEY) {
-    return fallback;
-  }
+  const client = getWatsonxClient();
+  if (!client) return fallback;
 
   try {
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_tokens: 120,
-      temperature: 0.4,
+    const response = await client.textChat({
+      modelId: process.env.WATSONX_MODEL_ID || 'ibm/granite-3-8b-instruct',
+      projectId: process.env.WATSONX_PROJECT_ID,
       messages: [
         {
           role: 'system',
@@ -149,29 +157,27 @@ async function buildExplanation(inv, { weeklyAmount, holdPeriodMonths, riskProfi
             `End with the labeled historical return range. Do NOT use the word "investment" more than once.`,
         },
       ],
+      parameters: { max_new_tokens: 120, temperature: 0.4 },
     });
 
-    return response.choices[0]?.message?.content?.trim() || fallback;
+    return response.result?.choices?.[0]?.message?.content?.trim() || fallback;
   } catch {
     return fallback;
   }
 }
 
 /**
- * Use OpenAI to get a brief current market summary sentence to show as the
- * data source note on the compare page (replaces "Alpha Vantage illustrative").
+ * Use watsonx.ai to get a brief current market summary sentence to show as
+ * the data source note on the compare page.
  */
 async function getMarketContextNote() {
-  if (!OpenAI || !process.env.OPENAI_API_KEY) {
-    return null;
-  }
+  const client = getWatsonxClient();
+  if (!client) return null;
 
   try {
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_tokens: 60,
-      temperature: 0.3,
+    const response = await client.textChat({
+      modelId: process.env.WATSONX_MODEL_ID || 'ibm/granite-3-8b-instruct',
+      projectId: process.env.WATSONX_PROJECT_ID,
       messages: [
         {
           role: 'system',
@@ -185,8 +191,9 @@ async function getMarketContextNote() {
             'Example format: "Markets are broadly higher in 2024, led by tech and AI; the Fed has begun cutting rates."',
         },
       ],
+      parameters: { max_new_tokens: 60, temperature: 0.3 },
     });
-    return response.choices[0]?.message?.content?.trim() || null;
+    return response.result?.choices?.[0]?.message?.content?.trim() || null;
   } catch {
     return null;
   }

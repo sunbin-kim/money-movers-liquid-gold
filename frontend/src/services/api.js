@@ -80,6 +80,10 @@ export const api = {
   unsellEntry: (id) =>
     axios.post(`${BASE}/api/history/${id}/unsell`, {}, { headers: authHeaders() }),
 
+  /** PATCH /api/history/cash  — deposit (positive) or withdraw (negative) */
+  adjustCash: (delta) =>
+    axios.patch(`${BASE}/api/history/cash`, { delta }, { headers: authHeaders() }),
+
   // ── Friends / Social ─────────────────────────────────────────────────────────
   /** GET /api/friends */
   getFriends: () =>

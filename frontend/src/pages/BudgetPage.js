@@ -52,6 +52,7 @@ export default function BudgetPage() {
   // originalSurvey: locked-in survey values so the sublabel never changes after navigation
   const [originalSurvey, setOriginalSurvey]             = useState({ riskProfile: null, holdPeriodMonths: null });
   const [loadingPortfolios, setLoadingPortfolios]       = useState(false);
+  const [cashBalance, setCashBalance]                   = useState(null);
 
   // frequency is now stored in AppContext — no local state needed
 
@@ -81,8 +82,9 @@ export default function BudgetPage() {
       api.getPortfolios(),
       api.getMe(localStorage.getItem('lg_auth_token')),
       api.getSurvey(),
+      api.getHistory(),
     ])
-      .then(([portRes, meRes, surveyRes]) => {
+      .then(([portRes, meRes, surveyRes, histRes]) => {
         if (cancelled) return;
         const list  = portRes.data.portfolios || [];
         const defId = meRes.data.user?.defaultPortfolioId || null;
@@ -104,6 +106,9 @@ export default function BudgetPage() {
 
         // Auto-select the persisted default on load
         if (defId) setSelectedPortfolioId(defId);
+
+        // Cash balance
+        setCashBalance(histRes.data.cashBalance ?? 0);
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoadingPortfolios(false); });
@@ -188,6 +193,27 @@ export default function BudgetPage() {
             Choose a portfolio — it sets the risk and hold period automatically.
           </p>
         </div>
+
+        {/* ── Cash balance chip (always visible when not in reinvest mode) ── */}
+        {reinvestAmount == null && cashBalance !== null && (
+          <div
+            className="rounded-2xl px-4 py-3 flex items-center gap-3"
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--low)44' }}
+          >
+            <span className="text-xl">💵</span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--low)' }}>
+                Cash balance
+              </p>
+              <p className="text-lg font-black" style={{ color: 'var(--low)' }}>
+                ${cashBalance.toFixed(2)}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                Available to reinvest · manage in Dashboard
+              </p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleReturningSubmit} className="space-y-5">
 

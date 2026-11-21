@@ -38,6 +38,9 @@ const stmts = {
   deductCashBalance: db.prepare(`
     UPDATE users SET cash_balance = MAX(0, cash_balance - ?) WHERE id = ?
   `),
+  setCashBalance: db.prepare(`
+    UPDATE users SET cash_balance = MAX(0, cash_balance + ?) WHERE id = ?
+  `),
   getCashBalance: db.prepare(`
     SELECT cash_balance FROM users WHERE id = ?
   `),
@@ -147,6 +150,17 @@ function getCashBalance(userId) {
 }
 
 /**
+ * Manually adjust cash balance by a signed delta.
+ * Positive delta = deposit, negative delta = withdrawal.
+ * Balance is clamped to 0 (cannot go negative).
+ */
+function adjustCashBalance(userId, delta) {
+  stmts.setCashBalance.run(delta, userId);
+  const row = stmts.getCashBalance.get(userId);
+  return row ? +(row.cash_balance).toFixed(2) : 0;
+}
+
+/**
  * Summarise the portfolio mix from active (unsold) history entries.
  */
 function getPortfolioSummary(userId) {
@@ -211,4 +225,4 @@ function unsellEntry(userId, entryId) {
   };
 }
 
-module.exports = { getHistory, addEntry, sellEntry, deleteEntry, unsellEntry, getCashBalance, getPortfolioSummary };
+module.exports = { getHistory, addEntry, sellEntry, deleteEntry, unsellEntry, getCashBalance, adjustCashBalance, getPortfolioSummary };

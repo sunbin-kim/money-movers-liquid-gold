@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
-const { getHistory, addEntry, sellEntry, deleteEntry, unsellEntry, getCashBalance, getPortfolioSummary } = require('../services/historyStore');
+const { getHistory, addEntry, sellEntry, deleteEntry, unsellEntry, getCashBalance, adjustCashBalance, getPortfolioSummary } = require('../services/historyStore');
 const { requireAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -99,6 +99,29 @@ router.delete('/:id', [param('id').notEmpty()], (req, res) => {
     summary:     getPortfolioSummary(uid),
   });
 });
+
+/**
+ * PATCH /api/history/cash  — manually deposit or withdraw cash
+ * Body: { delta: number }  positive = deposit, negative = withdrawal
+ */
+router.patch(
+  '/cash',
+  [
+    body('delta')
+      .isFloat()
+      .withMessage('delta must be a number'),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const uid = req.user.id;
+    const { delta } = req.body;
+    const cashBalance = adjustCashBalance(uid, parseFloat(delta));
+    res.json({ cashBalance });
+  }
+);
 
 /**
  * POST /api/history/:id/unsell  — undo a sell (restores entry to active)

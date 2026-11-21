@@ -43,6 +43,12 @@ export default function DashboardPage() {
   // 'all' | '' (original) | '<portfolio-id>'
   const [activePortfolio, setActivePortfolio] = useState('all');
 
+  // Cash adjustment inline form
+  const [cashMode, setCashMode]   = useState(null); // null | 'deposit' | 'withdraw'
+  const [cashInput, setCashInput] = useState('');
+  const [cashError, setCashError] = useState('');
+  const [cashBusy, setCashBusy]   = useState(false);
+
   async function load() {
     try {
       const [histRes, portRes] = await Promise.all([
@@ -60,6 +66,29 @@ export default function DashboardPage() {
   }
 
   useEffect(() => { load(); }, []);
+
+  async function handleCashAdjust(e) {
+    e.preventDefault();
+    const amount = parseFloat(cashInput);
+    if (!amount || amount <= 0) { setCashError('Enter a positive amount.'); return; }
+    if (cashMode === 'withdraw' && amount > cashBalance) {
+      setCashError(`You only have $${cashBalance.toFixed(2)} to withdraw.`);
+      return;
+    }
+    setCashError('');
+    setCashBusy(true);
+    try {
+      const delta = cashMode === 'deposit' ? amount : -amount;
+      const res = await api.adjustCash(delta);
+      setCashBalance(res.data.cashBalance);
+      setCashInput('');
+      setCashMode(null);
+    } catch {
+      setCashError('Could not update balance. Try again.');
+    } finally {
+      setCashBusy(false);
+    }
+  }
 
   // All portfolio tabs: All · Original Portfolio · <named portfolios>
   const portfolioTabs = useMemo(() => [
@@ -156,11 +185,12 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Cash balance banner ─────────────────────────────────────────────── */}
-      {cashBalance > 0 && (
-        <div
-          className="rounded-2xl px-4 py-3 flex items-center justify-between"
-          style={{ background: 'var(--surface-2)', border: `1px solid ${C.green}44` }}
-        >
+      <div
+        className="rounded-2xl px-4 py-3"
+        style={{ background: 'var(--surface-2)', border: `1px solid ${C.green}44` }}
+      >
+        {/* Top row: balance + action buttons */}
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: C.green }}>
               💵 Cash balance
@@ -169,18 +199,73 @@ export default function DashboardPage() {
               ${cashBalance.toFixed(2)}
             </p>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>
-              From sold investments · available to reinvest
+              Deposit, withdraw, or reinvest
             </p>
           </div>
-          <button
-            onClick={() => navigate('/start', { state: { reinvestAmount: cashBalance } })}
-            className="px-4 py-2 rounded-xl text-sm font-semibold shrink-0"
-            style={{ background: C.green + '22', color: C.green, border: `1px solid ${C.green}44` }}
-          >
-            Reinvest →
-          </button>
+          <div className="flex flex-col gap-2 shrink-0">
+            <button
+              onClick={() => { setCashMode(cashMode === 'deposit' ? null : 'deposit'); setCashInput(''); setCashError(''); }}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ background: C.green + '22', color: C.green, border: `1px solid ${C.green}44` }}
+            >
+              + Deposit
+            </button>
+            <button
+              onClick={() => { setCashMode(cashMode === 'withdraw' ? null : 'withdraw'); setCashInput(''); setCashError(''); }}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ background: C.red + '22', color: C.red, border: `1px solid ${C.red}44` }}
+            >
+              − Withdraw
+            </button>
+            {cashBalance > 0 && (
+              <button
+                onClick={() => navigate('/start', { state: { reinvestAmount: cashBalance } })}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+                style={{ background: 'var(--gold-pale)', color: C.gold, border: `1px solid var(--gold)44` }}
+              >
+                Reinvest →
+              </button>
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Inline deposit / withdraw form */}
+        {cashMode && (
+          <form onSubmit={handleCashAdjust} className="mt-3 flex items-center gap-2">
+            <span className="text-sm font-bold" style={{ color: cashMode === 'deposit' ? C.green : C.red }}>$</span>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="0.00"
+              value={cashInput}
+              onChange={(e) => { setCashInput(e.target.value); setCashError(''); }}
+              className="flex-1 text-sm font-semibold outline-none bg-transparent pb-0.5"
+              style={{ color: 'var(--text)', borderBottom: `2px solid ${cashMode === 'deposit' ? C.green : C.red}` }}
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={cashBusy}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ background: cashMode === 'deposit' ? C.green + '22' : C.red + '22', color: cashMode === 'deposit' ? C.green : C.red }}
+            >
+              {cashBusy ? '…' : cashMode === 'deposit' ? 'Add' : 'Remove'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setCashMode(null); setCashInput(''); setCashError(''); }}
+              className="px-2 py-1.5 rounded-xl text-xs"
+              style={{ color: C.muted }}
+            >
+              Cancel
+            </button>
+          </form>
+        )}
+        {cashError && (
+          <p className="text-xs mt-1.5" style={{ color: C.red }}>{cashError}</p>
+        )}
+      </div>
 
       {/* ── Portfolio overview cards ─────────────────────────────────────────── */}
       {portfolios.length > 0 && (
